@@ -126,8 +126,7 @@ $smarty->assign('comments', getcomments($page['type'], $page['typeid']));
 // Данные о квесте
 $smarty->assign('faction', $faction);
 // Если хоть одна информация о вещи найдена - передаём массив с информацией о вещях шаблонизатору
-if (isset($allitems))
-    $smarty->assign('allitems', $allitems);
+$smarty->assign('allitems', $allitems ?: array());
 /*
   if (isset($npcs))
   $smarty->assign('npcs',$npcs);

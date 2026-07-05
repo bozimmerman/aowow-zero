@@ -12,7 +12,7 @@
 			{section name=i loop=$data}
 				{ldelim}
 					id: '{$data[i].id}',
-					name: '{$data[i].name|escape:"quotes"}',
+					name: '{$data[i].name|escape:"javascript"}',
 					percent: {$data[i].percent}
 				{rdelim}
 				{if $smarty.section.i.last}{else},{/if}

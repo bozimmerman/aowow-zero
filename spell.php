@@ -41,8 +41,12 @@ if (!$spell = load_cache(13, intval($id))) {
 			AND i.id = s.spellicon
 		', $id
     );
-    if ($row) {
-        $spell = array();
+    if (!$row) {
+        echo 'Spell not found.';
+        return;
+    }
+
+    $spell = array();
         // Номер спелла
         $spell['entry'] = $row['spellID'];
         // Имя спелла
@@ -144,12 +148,12 @@ if (!$spell = load_cache(13, intval($id))) {
         $i = 0;
         $spell['effect'] = array();
         // Btt - Buff TollTip
-        if ($row['buff'])
+        if (!empty($row['buff_loc' . $_SESSION['locale']]))
             $spell['btt'] = spell_buff_render($row);
         for ($j = 1; $j <= 3; $j++) {
             if ($row['effect' . $j . 'id'] > 0) {
                 // Название эффекта
-                $spell['effect'][$i]['name'] = $spell_effect_names[$row['effect' . $j . 'id']];
+                $spell['effect'][$i]['name'] = $spell_effect_names[$row['effect' . $j . 'id']] ?? '';
                 // Доп информация в имени
                 if ($row['effect' . $j . 'MiscValue']) {
                     switch ($row['effect' . $j . 'id']) {
@@ -168,7 +172,7 @@ if (!$spell = load_cache(13, intval($id))) {
                             }
                         // скиллы
                         case 118: {// "Require Skill"
-                                $spell['effect'][$i]['name'] .= ' (' . $DB->selectCell('SELECT name FROM ?_aowow_skill WHERE skillID=? LIMIT 1', $row['effect' . $j . 'MiscValue']) . ')';
+                                $spell['effect'][$i]['name'] .= ' (' . $DB->selectCell('SELECT name_loc' . $_SESSION['locale'] . ' FROM ?_aowow_skill WHERE skillID=? LIMIT 1', $row['effect' . $j . 'MiscValue']) . ')';
                                 break;
                             }
                         // ауры
@@ -473,19 +477,18 @@ if (!$spell = load_cache(13, intval($id))) {
         if (!($spell['taughtbynpc']))
             unset($spell['taughtbynpc']);
 
-        $smarty->assign('spell', $spell);
-        save_cache(13, $spell['spellID'], $spell);
-    }
+        save_cache(13, $spell['entry'], $spell);
 }
+$smarty->assign('spell', $spell);
 
 global $page;
 $page = array(
     'Mapper' => false,
     'Book' => false,
-    'Title' => $spell['name'] . ' - ' . $smarty->get_config_vars('Spells'),
+    'Title' => ($spell ? $spell['name'] . ' - ' : '') . $smarty->get_config_vars('Spells'),
     'tab' => 0,
     'type' => 6,
-    'typeid' => $spell['entry'],
+    'typeid' => $spell ? $spell['entry'] : 0,
     'path' => '[0,1]'
 );
 $smarty->assign('page', $page);
@@ -495,9 +498,7 @@ $smarty->assign('comments', getcomments($page['type'], $page['typeid']));
 
 // Количество MySQL запросов
 $smarty->assign('mysql', $DB->getStatistics());
-if (count($allspells) >= 0)
-    $smarty->assign('allspells', $allspells);
-if (count($allitems) >= 0)
-    $smarty->assign('allitems', $allitems);
+$smarty->assign('allspells', $allspells ?: array());
+$smarty->assign('allitems', $allitems ?: array());
 
 $smarty->display('spell.tpl');

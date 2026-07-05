@@ -9,8 +9,8 @@
  * @copyright   Copyright (c) 2011 mangos foundation (http://getmangos.com/)
  * @license     http://www.gnu.org/licenses/gpl.html GPL v3
  */
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
+ini_set('display_errors', 0);
 
 // Настройка шаблонизатора и ДБ
 include('includes/kernel.php');
@@ -28,15 +28,35 @@ if (IsSet($_COOKIE['remember_me']) and !(IsSet($_SESSION['username']))) {
     $_SESSION['shapass'] = substr($_COOKIE['remember_me'], strlen($_COOKIE['remember_me']) - 40, 40);
 }
 
+$user = null;
 if (IsSet($_SESSION['username']) and IsSet($_SESSION['shapass'])) {
-    $user = array();
-    $user = CheckPwd($_SESSION['username'], $_SESSION['shapass'], true);
-    $_SESSION['userid'] = $user['id'];
-    $_SESSION['roles'] = $user['roles'];
-    if ($user > 0)
+    $user = CheckPwd($_SESSION['username'], $_SESSION['shapass']);
+    if (is_array($user) && $user) {
+        $_SESSION['userid'] = $user['id'];
+        $_SESSION['roles'] = $user['roles'];
         $smarty->assign('user', $user);
-    else
-        UnSet($user);
+    } else {
+        $user = null;
+    }
+}
+$smarty->assign('user', $user);
+
+if ($user && isset($cDB)) {
+    require_once('includes/allcharacters.php');
+    $char_list = get_character_list($user['id']);
+    $json_list = array();
+    foreach ($char_list as $ch) {
+        $json_list[] = array(
+            'guid'  => $ch['guid'],
+            'name'  => $ch['name'],
+            'level' => $ch['level'],
+            'class' => $ch['class'],
+            'race'  => $ch['race'],
+        );
+    }
+    $smarty->assign('characters_json', json_encode($json_list));
+} else {
+    $smarty->assign('characters_json', '[]');
 }
 
 // Язык сайта
@@ -54,6 +74,7 @@ $queryx = $_SERVER['QUERY_STRING'];
 $conf_file = $smarty->get_template_vars('language') . '.conf';
 $smarty->assign('conf_file', $conf_file);
 $smarty->assign('query', $_SERVER['QUERY_STRING']);
+$smarty->assign('title', '');
 
 // Параметры страницы
 global $page;
@@ -66,6 +87,7 @@ $page = array(
     'typeid' => 0,
     'path' => '[]'
 );
+$smarty->assign('page', $page);
 
 // В зависимости от раздела, выбираем что открывать:
 
@@ -141,6 +163,14 @@ switch ($razdel) {
         break;
     case 'spells':
         include 'spells.php';
+        break;
+    case 'character':
+    case 'characters':
+        if (!isset($_SESSION['userid'])) {
+            header('Location: ?account=signin');
+            exit;
+        }
+        include 'character.php';
         break;
     default:
         include 'main.php';

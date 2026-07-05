@@ -49,7 +49,7 @@ if (!$data = load_cache(4, intval($type))) {
         $data[$i]['entry'] = $row['entry'];
         if (IsSet($row['skill']))
             $data[$i]['skill'] = $row['skill'];
-        $data[$i]['name'] = $row['name_loc'] ? $row['name_loc'] : $row['name'];
+        $data[$i]['name'] = !empty($row['name_loc']) ? $row['name_loc'] : $row['name'];
         // TODO: Расположение
         $data[$i]['location'] = "[-1]";
         // Тип объекта

@@ -26,7 +26,7 @@
 					<tr><th>{#Quick_Facts#}</th></tr>
 					<tr><td><div class="infobox-spacer"></div>
 						<ul>
-							<li><div>{#Level#}: {$itemset.minlevel}{if $itemset.minlevel!=$itemset.maxlevel - {$itemset.maxlevel}{/if}</div></li>{if $user.roles == 2}<li><div><a href="?admin.editarticle=5.{$itemset.entry}">{#Write_article#}</a></div></li>{/if}{if $itemset.Aflags & 2}<li><div>{#Not_Available_to_Players#}</div></li>{/if}{if $itemset.Aflags & 8}<li><div>{#No_Longer_Available_to_Players#}</div></li>{/if} {if $itemset.Aflags & 16}<li><div>{#Added_in_patch_24#}</div></li>{/if} 
+							<li><div>{#Level#}: {$itemset.minlevel}{if $itemset.minlevel!=$itemset.maxlevel} - {$itemset.maxlevel}{/if}</div></li>{if isset($user) && $user.roles == 2}<li><div><a href="?admin.editarticle=5.{$itemset.entry}">{#Write_article#}</a></div></li>{/if}{if $itemset.Aflags & 2}<li><div>{#Not_Available_to_Players#}</div></li>{/if}{if $itemset.Aflags & 8}<li><div>{#No_Longer_Available_to_Players#}</div></li>{/if} {if $itemset.Aflags & 16}<li><div>{#Added_in_patch_24#}</div></li>{/if} 
 						</ul>
 					</td></tr>
 				</table>

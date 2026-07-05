@@ -423,6 +423,7 @@ function spell_desc2($spellRow, $type='tooltip') {
                     $equation = $base . $op . $oparg;
                     eval('$base = $equation;');
                 }
+                $base = (float)$base;
 
                 @$str .= abs($base) . ($spell['effect' . $exprData[0] . 'DieSides'] > 1 ? ' to ' . abs(($base + $spell['effect' . $exprData[0] . 'DieSides'])) : '');
                 $lastvalue = $base;
@@ -670,7 +671,7 @@ function spell_desc2($spellRow, $type='tooltip') {
     }
     $str .= substr($data, $pos);
 
-    $str = @preg_replace_callback("|\{([^\}]+)\}|", create_function('$matches', 'return eval("return abs(".$matches[1].");");'), $str);
+    $str = @preg_replace_callback("|\{([^\}]+)\}|", function($matches) { return eval("return abs(".$matches[1].");"); }, $str);
 
     return($str);
 }
@@ -859,7 +860,7 @@ function spell_buff_render($row) {
     $x = '<table><tr>';
 
     // Имя баффа
-    $x .= '<td><b class="q">' . $row['spellname'] . '</b></td>';
+    $x .= '<td><b class="q">' . $row['spellname_loc' . $_SESSION['locale']] . '</b></td>';
 
     // Тип диспела
     if ($row['dispeltypeID']) {
@@ -958,7 +959,7 @@ function spellinfo2(&$row) {
 //			if($skillrow['req_skill_value'] != 1)
 //				$spell['learnedat'] = $skillrow['req_skill_value'];
             // TODO: На каком уровне скилла можно обучиться спеллу (поле learnedat)
-            if ($row['min_value'] and $row['max_value']) {
+            if (!empty($row['min_value']) and !empty($row['max_value'])) {
                 $spell['colors'] = array();
                 $spell['colors'][0] = '';
                 $spell['colors'][1] = $row['min_value'];

@@ -12,7 +12,7 @@
 
 // Для списка creatureinfo()
 $npc_cols[0] = array('name', 'subname', 'minlevel', 'maxlevel', 'Creaturetype', 'rank', 'FactionAlliance', 'FactionHorde');
-$npc_cols[1] = array('subname', 'minlevel', 'maxlevel', 'creaturetype', 'rank', 'MinLevelHealth', 'MaxLevelHealth', 'MinLevelMana', 'MaxLevelMana', 'MinLootGold', 'MaxLootGold', 'lootid', /*'spell1', 'spell2', 'spell3', 'spell4',*/ 'FactionAlliance', 'FactionHorde', 'MinMeleeDmg', 'MaxMeleeDmg', 'MeleeAttackPower', 'DamageMultiplier', 'armor');
+$npc_cols[1] = array('subname', 'minlevel', 'maxlevel', 'creaturetype', 'rank', 'MinLevelHealth', 'MaxLevelHealth', 'MinLevelMana', 'MaxLevelMana', 'MinLootGold', 'MaxLootGold', 'lootid', 'FactionAlliance', 'FactionHorde', 'MinMeleeDmg', 'MaxMeleeDmg', 'MeleeAttackPower', 'DamageMultiplier', 'armor');
 
 // Функция информации о создании
 /**

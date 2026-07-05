@@ -8,7 +8,7 @@
 			<script type="text/javascript">
 				{include file='bricks/allcomments.tpl'}
 				var g_pageInfo = {ldelim}type: 1, typeId: {$npc.entry}, name: '{$npc.name|escape:"quotes"}'{rdelim};
-				g_initPath([0,4,{$npc.type}]);
+				g_initPath([0,4,{$npc.creaturetype}]);
 			</script>
 
 			<table class="infobox">
@@ -17,7 +17,7 @@
 					<ul>
 						<li><div>{#Level#}: {if $npc.minlevel<>$npc.maxlevel}{$npc.minlevel} - {/if}{$npc.maxlevel}</div></li>
 						<li><div>{#Classification#}: {$npc.rank}</div></li>
-						<li><div>{#React#}: <span class="q{if $npc.A==-1}7{elseif $npc.A==1}2{else}{/if}">A</span> <span class="q{if $npc.H==-1}7{elseif $npc.H==1}2{else}{/if}">H</span></div></li>
+						<li><div>{#React#}: <span class="q{if isset($npc.A) && $npc.A==-1}7{elseif isset($npc.A) && $npc.A==1}2{else}{/if}">A</span> <span class="q{if isset($npc.H) && $npc.H==-1}7{elseif isset($npc.H) && $npc.H==1}2{else}{/if}">H</span></div></li>
 						<li><div>{#Faction#}: <a href="?faction={$npc.faction_num}">{$npc.faction}</a></div></li>
 						<li><div>{#Health#}: {if $npc.minhealth<>$npc.maxhealth}{$npc.minhealth} - {/if}{$npc.maxhealth}</div></li>
 {if ($npc.minmana or $npc.maxmana)}
@@ -93,7 +93,7 @@
 {else}
 				{#This_NPC_cant_be_found#}
 {/if}
-				{$npc.article}
+				{if isset($npc.article)}{$npc.article}{/if}
 
 				<h2>{#Related#}</h2>
 

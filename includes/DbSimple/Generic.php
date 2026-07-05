@@ -525,7 +525,7 @@ class DbSimple_Generic_Database extends DbSimple_Generic_LastError
         if ($total) {
             $this->_transformQuery($query, 'CALC_TOTAL');
         }
-        $is_cacher_callable = (is_callable($this->_cacher) || (method_exists($this->_cacher, 'get') && method_exists($this->_cacher, 'save')));
+        $is_cacher_callable = (is_callable($this->_cacher) || (is_object($this->_cacher) && method_exists($this->_cacher, 'get') && method_exists($this->_cacher, 'save')));
         $rows = null;
         $cache_it = false;
         if (!empty($this->attributes['CACHE']) && $is_cacher_callable) {
@@ -593,7 +593,7 @@ class DbSimple_Generic_Database extends DbSimple_Generic_LastError
             $result = $this->_performQuery($query);
             $fetchTime = $firstFetchTime = 0;
 
-            if (is_resource($result)) {
+            if (is_resource($result) || is_object($result)) {
                 $rows = array();
                 // Fetch result row by row.
                 $fStart = $this->_microtime();
@@ -1080,7 +1080,7 @@ class DbSimple_Generic_Database extends DbSimple_Generic_LastError
         $log .= "; returned ";
 
         if (!is_array($rows)) {
-            $log .= $this->escape($rows);
+            $log .= is_object($rows) ? get_class($rows) : $this->escape($rows);
         } else {
             $detailed = null;
             if (count($rows) == 1) {

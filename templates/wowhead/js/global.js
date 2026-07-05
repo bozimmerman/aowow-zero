@@ -471,12 +471,13 @@ function g_initHeader(B) {
     var H = ce("dl");
     g_expandSite()
     for (var G = 0, J = mn_path.length; G < J; ++G) {
+        if (mn_path[G][0] === 2 && (!g_user || !g_characters)) continue;
         var E = ce("dt");
         var L = ce("a");
         var I = ce("ins");
         var F = ce("big");
         var D = ce("span");
-        if (mn_path[G][0] != B) {
+        if (mn_path[G][0] != B || mn_path[G][0] === 2) {
             L.menu = mn_path[G][3];
             L.onmouseover = Menu.show;
             L.onmouseout = Menu.hide
@@ -501,6 +502,14 @@ function g_initHeader(B) {
     }
     ae(ge("toptabs-right-generic"), H);
     var A = ge("menu-buttons-generic");
+    if (g_characters && g_characters.length > 0) {
+        mn_characters.length = 0;
+        for (var i = 0; i < g_characters.length; i++) {
+            var ch = g_characters[i];
+            mn_characters.push([i + 1, ch.name + ' (' + ch.level + ')', '?character=' + ch.guid]);
+        }
+        mn_characters.push([, 'All Characters', '?characters']);
+    }
     if (B != null && B >= 0 && B < mn_path.length) {
         switch (B) {
         case 0:
@@ -510,7 +519,6 @@ function g_initHeader(B) {
             Menu.addButtons(A, mn_tools);
             break;
         case 2:
-            Menu.addButtons(A, Menu.explode(mn_more));
             break;
         }
     } else {
@@ -3957,6 +3965,115 @@ Listview.templates = {
         }],
         getItemLink: function (A) {
             return "?faction=" + A.id
+        }
+    },
+    character: {
+        sort: ['name'],
+        nItemsPerPage: -1,
+        columns: [{
+            id: 'name',
+            name: LANG.name,
+            align: 'left',
+            value: 'name',
+            span: 2,
+            compute: function (B, C) {
+                var A = ce('a');
+                A.style.fontFamily = 'Verdana, sans-serif';
+                A.href = '?character=' + B.id;
+                ae(A, ct(B.name));
+                ae(C, A)
+            }
+        }, {
+            id: 'race',
+            name: LANG.race,
+            width: '12%',
+            compute: function (A, B) {
+                ae(B, ct(g_chr_races[A.race] || 'Unknown'))
+            },
+            sortFunc: function (B, A) { return strcmp(g_chr_races[B.race], g_chr_races[A.race]) }
+        }, {
+            id: 'classs',
+            name: LANG.class,
+            width: '12%',
+            compute: function (A, B) {
+                ae(B, ct(g_chr_classes[A.classs] || 'Unknown'))
+            },
+            sortFunc: function (B, A) { return strcmp(g_chr_classes[B.classs], g_chr_classes[A.classs]) }
+        }, {
+            id: 'level',
+            name: LANG.level,
+            width: '7%',
+            value: 'level',
+            sortFunc: function (B, A) { return B.level - A.level }
+        }, {
+            id: 'zone',
+            name: LANG.zone,
+            width: '20%',
+            value: 'zone'
+        }, {
+            id: 'online',
+            name: 'Status',
+            width: '7%',
+            compute: function (A, B) {
+                var C = ce('span');
+                C.style.color = A.online ? '#00ff00' : '#888888';
+                ae(C, ct(A.online ? '\u25cf' : '\u25cf'));
+                ae(B, C)
+            }
+        }],
+        getItemLink: function (A) {
+            return '?character=' + A.id
+        }
+    },
+    character_inventory: {
+        sort: [1],
+        nItemsPerPage: 50,
+        columns: [{
+            id: "name",
+            name: LANG.name,
+            align: "left",
+            span: 2,
+            compute: function (D, G, E) {
+                var C = ce("td");
+                C.style.width = "1px";
+                C.style.padding = "0";
+                C.style.borderRight = "none";
+                ae(C, g_items.createIcon(D.entry, 1));
+                ae(E, C);
+                G.style.borderLeft = "none";
+                var A = ce("a");
+                A.className = "q" + D.quality;
+                A.href = "?item=" + D.entry;
+                ae(A, ct(D.name));
+                ae(G, A)
+            }
+        }, {
+            id: "count",
+            name: LANG.count,
+            width: "10%",
+            value: "stack"
+        }, {
+            id: "level",
+            name: LANG.level,
+            width: "10%",
+            value: "level",
+            sortFunc: function (B, A) {
+                return strcmp(B.level, A.level) || strcmp(B.reqlevel, A.reqlevel)
+            }
+        }, {
+            id: "type",
+            name: LANG.type,
+            width: "20%",
+            compute: function (C, D) {
+                D.className = "small q1";
+                var A = ce("a");
+                A.href = "?items=" + C.classs + "." + C.subclass;
+                ae(A, ct(Listview.funcBox.getItemType(C.classs, C.subclass)));
+                ae(D, A)
+            }
+        }],
+        getItemLink: function (A) {
+            return "?item=" + A.entry
         }
     },
     item: {

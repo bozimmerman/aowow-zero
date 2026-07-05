@@ -43,7 +43,7 @@
 									zone: {$zone_c.zone},
 									coords: [
 										{foreach from=$exdata[$smarty.foreach.zone_f.index] item=exdata_c name=exdata_f}
-											{if ($exdata_c.x and $exdata_c.y)}
+											{if isset($exdata_c.x) and isset($exdata_c.y)}
 												[{$exdata_c.x},{$exdata_c.y},
 												{ldelim}
 													label:'$<br>

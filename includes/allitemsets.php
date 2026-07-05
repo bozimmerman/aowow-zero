@@ -32,6 +32,8 @@ function itemsetinfo2(&$row) {
             $itemset['pieces'][] = $row['item' . $j];
             $item = array();
             $item = iteminfo($row['item' . $j], 0);
+            if (!$item)
+                continue;
             if ($item['level'] < $itemset['minlevel'])
                 $itemset['minlevel'] = $item['level'];
             if ($item['level'] > $itemset['maxlevel'])

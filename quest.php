@@ -29,6 +29,10 @@ if (!$quest = load_cache(10, intval($id))) {
 
     // Основная инфа
     $quest = GetDBQuestInfo($id, 0xFFFFFF);
+    if (!$quest) {
+        echo 'Quest not found.';
+        return;
+    }
 
 
     /*              ЦЕПОЧКА КВЕСТОВ              */
@@ -83,6 +87,7 @@ if (!$quest = load_cache(10, intval($id))) {
 
     /*              ДРУГИЕ КВЕСТЫ              */
     // (после их нахождения проверяем их тайтлы на наличие локализации)
+    $questItems = array();
     // Квесты, которые необходимо выполнить, что бы получить этот квест
     if (!$quest['req'] = $DB->select('
 				SELECT q.entry, q.Title, q.NextQuestInChain
@@ -180,7 +185,7 @@ if (!$quest = load_cache(10, intval($id))) {
             $questItems[] = 'enabledby';
 
     // Теперь локализуем все тайтлы квестов
-    if ($questItems)
+    if (!empty($questItems))
         foreach ($questItems as $item)
             foreach ($quest[$item] as $i => $x)
                 if (!empty($quest[$item][$i]['Title_loc']))
@@ -190,39 +195,22 @@ if (!$quest = load_cache(10, intval($id))) {
 
     /*             НАГРАДЫ И ТРЕБОВАНИЯ             */
 
-    if ($quest['RequiredSkillValue'] > 0 && $quest['SkillOrClass'] > 0) {
-        // Требуемый уровень скилла, что бы получить квест
-        /*
-          $skills = array(
-          -264 => 197,	// Tailoring
-          -182 => 165,	// Leatherworking
-          -24 => 182,		// Herbalism
-          -101 => 356,	// Fishing
-          -324 =>	129,	// First Aid
-          -201 => 202,	// Engineering
-          -304 => 185,	// Cooking
-          -121 => 164,	// Blacksmithing
-          -181 => 171		// Alchemy
-          );
-         */
-
-        // TODO: skill localization
+    if (($quest['RequiredSkillValue'] ?? 0) > 0 && ($quest['RequiredSkill'] ?? 0) > 0) {
         $quest['reqskill'] = array(
-            'name' => $DB->selectCell('SELECT name_loc' . $_SESSION['locale'] . ' FROM ?_aowow_skill WHERE skillID=?d LIMIT 1', $quest['SkillOrClass']),
+            'name' => $DB->selectCell('SELECT name_loc' . $_SESSION['locale'] . ' FROM ?_aowow_skill WHERE skillID=?d LIMIT 1', $quest['RequiredSkill']),
             'value' => $quest['RequiredSkillValue']
         );
-    } elseif ($quest['SkillOrClass'] < 0)
-    // Требуемый класс, что бы получить квест
-        $quest['reqclass'] = $classes[abs($quest['SkillOrClass'])];
+    } elseif (($quest['RequiredClasses'] ?? 0) > 0)
+        $quest['reqclass'] = $classes[$quest['RequiredClasses']];
 
     // Требуемые отношения с фракциями, что бы начать квест
-    if ($quest['RequiredMinRepFaction'] && $quest['RequiredMinRepValue'])
+    if (($quest['RequiredMinRepFaction'] ?? 0) && ($quest['RequiredMinRepValue'] ?? 0))
         $quest['RequiredMinRep'] = array(
             'name' => $DB->selectCell('SELECT name_loc' . $_SESSION['locale'] . ' FROM ?_aowow_factions WHERE factionID=?d LIMIT 1', $quest['RequiredMinRepFaction']),
             'entry' => $quest['RequiredMinRepFaction'],
             'value' => $reputations[$quest['RequiredMinRepValue']]
         );
-    if ($quest['RequiredMaxRepFaction'] && $quest['RequiredMaxRepValue'])
+    if (($quest['RequiredMaxRepFaction'] ?? 0) && ($quest['RequiredMaxRepValue'] ?? 0))
         $quest['RequiredMaxRep'] = array(
             'name' => $DB->selectCell('SELECT name_loc' . $_SESSION['locale'] . ' FROM ?_aowow_factions WHERE factionID=?d LIMIT 1', $quest['RequiredMaxRepFaction']),
             'entry' => $quest['RequiredMaxRepFaction'],
@@ -232,7 +220,7 @@ if (!$quest = load_cache(10, intval($id))) {
     // Спеллы не требуют локализации, их инфа берется из базы
     // Хранить в базе все локализации - задачка на будующее
     // Спелл, кастуемый на игрока в начале квеста
-    if ($quest['SrcSpell']) {
+    if ($quest['SrcSpell'] ?? 0) {
         $tmp = $DB->selectRow('
 			SELECT ?#, s.spellname_loc' . $_SESSION['locale'] . '
 			FROM ?_aowow_spell s, ?_aowow_spellicons si
@@ -246,12 +234,16 @@ if (!$quest = load_cache(10, intval($id))) {
                 'name' => $tmp['spellname_loc' . $_SESSION['locale']],
                 'entry' => $tmp['spellID']);
             allspellsinfo2($tmp);
+        } else {
+            unset($quest['SrcSpell']);
         }
-        unset($tmp);
+    } else {
+        unset($quest['SrcSpell']);
     }
+    unset($tmp);
 
     // Спелл, кастуемый на игрока в награду за выполнение
-    if ($quest['RewSpellCast'] > 0 || $quest['RewSpell'] > 0) {
+    if (($quest['RewSpellCast'] ?? 0) > 0 || ($quest['RewSpell'] ?? 0) > 0) {
         $tmp = $DB->SelectRow('
 			SELECT ?#, s.spellname_loc' . $_SESSION['locale'] . '
 			FROM ?_aowow_spell s, ?_aowow_spellicons si
@@ -273,9 +265,9 @@ if (!$quest = load_cache(10, intval($id))) {
     //$quest['creaturereqs'] = array();
     //$quest['objectreqs'] = array();
     $quest['coreqs'] = array();
-    for ($i = 0; $i <= 4; ++$i) {
+    for ($i = 1; $i <= 4; ++$i) {
         //echo $quest['ReqCreatureOrGOCount'.$i].'<br />';
-        if ($quest['ReqCreatureOrGOId' . $i] != 0 && $quest['ReqCreatureOrGOCount' . $i] != 0) {
+        if (($quest['ReqCreatureOrGOId' . $i] ?? 0) != 0 && ($quest['ReqCreatureOrGOCount' . $i] ?? 0) != 0) {
             if ($quest['ReqCreatureOrGOId' . $i] > 0) {
                 // Необходимо какое-либо взамодействие с созданием
                 $quest['coreqs'][$i] = array_merge(
@@ -302,15 +294,15 @@ if (!$quest = load_cache(10, intval($id))) {
 
     // Вещи, необходимые для квеста
     $quest['itemreqs'] = array();
-    for ($i = 0; $i <= 4; ++$i) {
-        if ($quest['ReqItemId' . $i] != 0 && $quest['ReqItemCount' . $i] != 0)
+    for ($i = 1; $i <= 4; ++$i) {
+        if (($quest['ReqItemId' . $i] ?? 0) != 0 && ($quest['ReqItemCount' . $i] ?? 0) != 0)
             $quest['itemreqs'][] = array_merge(iteminfo($quest['ReqItemId' . $i]), array('count' => $quest['ReqItemCount' . $i]));
     }
     if (!$quest['itemreqs'])
         unset($quest['itemreqs']);
 
     // Фракции необходимые для квеста
-    if ($quest['RepObjectiveFaction'] > 0 && $quest['RepObjectiveValue'] > 0) {
+    if (($quest['RepObjectiveFaction'] ?? 0) > 0 && ($quest['RepObjectiveValue'] ?? 0) > 0) {
         $quest['factionreq'] = array(
             'name' => $DB->selectCell('SELECT name_loc' . $_SESSION['locale'] . ' FROM ?_aowow_factions WHERE factionID=?d LIMIT 1', $quest['RepObjectiveFaction']),
             'entry' => $quest['RepObjectiveFaction'],
@@ -341,6 +333,8 @@ if (!$quest = load_cache(10, intval($id))) {
                 $tmp['side'] = 'horde';
             elseif ($tmp['A'] == 1 && $tmp['H'] == -1)
                 $tmp['side'] = 'alliance';
+            else
+                $tmp['side'] = '';
             $quest['start'][] = array_merge($tmp, array('type' => 'npc'));
         }
     }
@@ -361,6 +355,7 @@ if (!$quest = load_cache(10, intval($id))) {
         foreach ($rows as $tmp) {
             if (!empty($tmp['name_loc']))
                 $tmp['name'] = $tmp['name_loc'];
+            $tmp['side'] = '';
             $quest['start'][] = array_merge($tmp, array('type' => 'object'));
         }
     }
@@ -381,6 +376,7 @@ if (!$quest = load_cache(10, intval($id))) {
         foreach ($rows as $tmp) {
             if (!empty($tmp['name_loc']))
                 $tmp['name'] = $tmp['name_loc'];
+            $tmp['side'] = '';
             $quest['start'][] = array_merge($tmp, array('type' => 'item'));
         }
     }
@@ -407,6 +403,8 @@ if (!$quest = load_cache(10, intval($id))) {
                 $tmp['side'] = 'horde';
             elseif ($tmp['A'] == 1 && $tmp['H'] == -1)
                 $tmp['side'] = 'alliance';
+            else
+                $tmp['side'] = '';
             $quest['end'][] = array_merge($tmp, array('type' => 'npc'));
         }
     }
@@ -427,6 +425,7 @@ if (!$quest = load_cache(10, intval($id))) {
         foreach ($rows as $tmp) {
             if (!empty($tmp['name_loc']))
                 $tmp['name'] = $tmp['name_loc'];
+            $tmp['side'] = '';
             $quest['end'][] = array_merge($tmp, array('type' => 'object'));
         }
     }
@@ -453,10 +452,8 @@ $smarty->assign('comments', getcomments($page['type'], $page['typeid']));
 // Данные о квесте
 $smarty->assign('quest', $quest);
 // Если хоть одна информация о вещи найдена - передаём массив с информацией о вещях шаблонизатору
-if (isset($allitems))
-    $smarty->assign('allitems', $allitems);
-if (isset($allspells))
-    $smarty->assign('allspells', $allspells);
+$smarty->assign('allitems', $allitems ?: array());
+$smarty->assign('allspells', $allspells ?: array());
 // Количество MySQL запросов
 $smarty->assign('mysql', $DB->getStatistics());
 // Загружаем страницу

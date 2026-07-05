@@ -27,6 +27,8 @@ if (!$itemset = load_cache(8, intval($id))) {
         $itemset = array();
         $itemset['entry'] = $row['itemsetID'];
         $itemset['name'] = $row['name_loc' . $_SESSION['locale']];
+        $itemset['article'] = '';
+        $itemset['Aflags'] = 0;
         $itemset['minlevel'] = 255;
         $itemset['maxlevel'] = 0;
         $itemset['count'] = 0;
@@ -84,9 +86,7 @@ $smarty->assign('comments', getcomments($page['type'], $page['typeid']));
 // Количество MySQL запросов
 $smarty->assign('mysql', $DB->getStatistics());
 // Если хоть одна информация о вещи найдена - передаём массив с информацией о вещях шаблонизатору
-if (isset($allitems))
-    $smarty->assign('allitems', $allitems);
-if (isset($allitems))
-    $smarty->assign('allspells', $allspells);
+$smarty->assign('allitems', $allitems ?: array());
+$smarty->assign('allspells', $allspells ?: array());
 // Запускаем шаблонизатор
 $smarty->display('itemset.tpl');

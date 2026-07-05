@@ -22,7 +22,8 @@ require_once('includes/allobjects.php');
 $smarty->config_load($conf_file, 'search');
 
 // Строка поиска:
-$nsearch = '%' . urldecode($podrazdel) . '%';
+$search = urldecode($podrazdel);
+$nsearch = '%' . $search . '%';
 
 $search_array = explode(' ', $nsearch);
 
@@ -42,6 +43,7 @@ global $spell_cols;
 $found = array();
 
 // Ищем вещи:
+$m = array();
 if ($_SESSION['locale'] > 0) {
     $tmp = $DB->select('
 			SELECT entry
@@ -64,13 +66,13 @@ $rows = $DB->select('
 			AND a.id = i.displayid;
 	', $item_cols[3], ($m) ? $_SESSION['locale'] : DBSIMPLE_SKIP, ($m) ? 1 : DBSIMPLE_SKIP, $nsearch, ($m) ? $m : DBSIMPLE_SKIP
 );
-unset($m);
 unset($t);
 unset($tmp);
 foreach ($rows as $numRow => $row)
     $found['item'][] = iteminfo2($row);
 
 // Ищем NPC:
+$m = array();
 if ($_SESSION['locale'] > 0) {
     $tmp = $DB->select('
 			SELECT entry
@@ -97,13 +99,13 @@ $rows = $DB->select('
 			AND factiontemplateID=FactionAlliance
 	', $npc_cols[0], ($m) ? $_SESSION['locale'] : DBSIMPLE_SKIP, ($m) ? 1 : DBSIMPLE_SKIP, $nsearch, $nsearch, ($m) ? $m : DBSIMPLE_SKIP
 );
-unset($m);
 unset($t);
 unset($tmp);
 foreach ($rows as $numRow => $row)
     $found['npc'][] = creatureinfo2($row);
 
 // Ищем объекты
+$m = array();
 if ($_SESSION['locale'] > 0) {
     $tmp = $DB->select('
 			SELECT entry
@@ -124,13 +126,13 @@ $rows = $DB->select('
 		WHERE name LIKE ? {OR g.entry IN (?a)}
 	', $object_cols[0], ($m) ? $_SESSION['locale'] : DBSIMPLE_SKIP, ($m) ? 1 : DBSIMPLE_SKIP, $nsearch, ($m) ? $m : DBSIMPLE_SKIP
 );
-unset($m);
 unset($t);
 unset($tmp);
 foreach ($rows as $numRow => $row)
     $found['object'][] = objectinfo2($row);
 
 // Ищем квесты
+$m = array();
 if ($_SESSION['locale'] > 0) {
     $tmp = $DB->select('
 			SELECT entry
@@ -151,7 +153,6 @@ $rows = $DB->select('
 		WHERE Title LIKE ? {OR q.entry IN (?a)}
 	', ($m) ? $_SESSION['locale'] : DBSIMPLE_SKIP, ($m) ? 1 : DBSIMPLE_SKIP, $nsearch, ($m) ? $m : DBSIMPLE_SKIP
 );
-unset($m);
 unset($t);
 unset($tmp);
 foreach ($rows as $numRow => $row)
@@ -195,10 +196,13 @@ if ((count($found) == 1) and (count($found[$keys[0]]) == 1)) {
 
     // Параметры страницы
     $page = array();
-    // Номер вкладки меню
+    $page['Mapper'] = false;
+    $page['Book'] = false;
+    $page['Title'] = $search . ' - ' . $smarty->get_config_vars('Search');
     $page['tab'] = 0;
-    // Заголовок страницы
-    $page['title'] = $search . ' - ' . $smarty->get_config_vars('Search');
+    $page['type'] = 0;
+    $page['typeid'] = 0;
+    $page['path'] = '[]';
     $smarty->assign('page', $page);
 
     $smarty->assign('mysql', $DB->getStatistics());

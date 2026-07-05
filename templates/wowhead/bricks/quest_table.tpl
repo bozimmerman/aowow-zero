@@ -8,7 +8,7 @@
 			{section name=i loop=$data}
 				{ldelim}
 					id: '{$data[i].entry}',
-					name: '{$data[i].Title|escape:"quotes"}',
+					name: '{$data[i].Title|escape:"javascript"}',
 					level: '{$data[i].QuestLevel}',
 					{if ($data[i].MinLevel)}
 						reqlevel:{$data[i].MinLevel},

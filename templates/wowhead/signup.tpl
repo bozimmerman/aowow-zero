@@ -38,6 +38,7 @@
 							<h1>{#Create_your_account#}</h1>
 							<div id="inputbox-error">{$signup_error}</div>
 
+							{if !isset($register) || $register}
 							<table align="center">
 								<tr>
 									<td align="right">{#Username#}:</td>
@@ -64,10 +65,13 @@
 									</td>
 								</tr>
 							</table>
+							{/if}
 						</div>
 					</form>
 
+					{if !isset($register) || $register}
 					<script type="text/javascript">ge('username-generic').focus()</script>
+					{/if}
 					<div class="clear"></div>
 				</div>
 

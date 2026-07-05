@@ -17,7 +17,7 @@ var myTabs = new Tabs({ldelim}parent: ge('tabs-generic'){rdelim});
 {if $found.npc}{include		file='bricks/creature_table.tpl'	id='npcs'		name='npcs'					tabsid='myTabs' data=$found.npc		}{/if}
 {if $found.object}{include	file='bricks/object_table.tpl'		id='objects'	name='objects'				tabsid='myTabs' data=$found.object	}{/if}
 {if $found.quest}{include	file='bricks/quest_table.tpl'		id='quests'		name='quests'				tabsid='myTabs' data=$found.quest	}{/if}
-{if $found.itemset}{include	file='bricks/itemset_table.tpl'		id='itemsets'	name='itemsets'				tabsid='myTabs' data=$found.itemset	}{/if}
+{if isset($found.itemset)}{include	file='bricks/itemset_table.tpl'		id='itemsets'	name='itemsets'				tabsid='myTabs' data=$found.itemset	}{/if}
 {if $found.spell}{include	file='bricks/spell_table.tpl'		id='spells'		name='uncategorizedspells'	tabsid='myTabs' data=$found.spell	}{/if}
 myTabs.flush();
 </script>

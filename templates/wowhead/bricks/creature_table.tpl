@@ -40,15 +40,18 @@ new Listview(
 		data:[
 			{section name=i loop=$data}
 				{ldelim}
-					name: '{$data[i].name|escape:"quotes"}',
+					name: '{$data[i].name|escape:"javascript"}',
 					{if $data[i].subname}
-						tag: '{$data[i].subname|escape:"quotes"}',
+						tag: '{$data[i].subname|escape:"javascript"}',
 					{/if}
 					minlevel: {$data[i].minlevel},
 					maxlevel: {$data[i].maxlevel},
 					type: {$data[i].type},
 					classification: {$data[i].classification},
 					react: [{$data[i].react}],
+					{if isset($data[i].location)}
+					location: [{$data[i].location}],
+					{/if}
 					{if $percent}
 						percent: {$data[i].percent},
 					{/if}

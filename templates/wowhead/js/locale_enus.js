@@ -8,7 +8,9 @@ var mn_zones = [[0, "Eastern Kingdoms"], [1, "Kalimdor"], [2, "Dungeons"], [3, "
 var mn_talentCalc = [["0", "Druid"], ["c", "Hunter"], ["o", "Mage"], ["s", "Paladin"], ["b", "Priest"], ["f", "Rogue"], ["h", "Shaman"], ["I", "Warlock"], ["L", "Warrior"]];
 var mn_database = [[, "Browse"], [0, "Items", "?items", mn_items], [2, "Item Sets", "?itemsets" ], [4, "NPCs", "?npcs", mn_npcs], [5, "Objects", "?objects", mn_objects], [3, "Quests", "?quests", mn_quests], [1, "Spells", "?spells", mn_spells], /*[6, "Zones", "?zones", mn_zones],*/ [7, "Factions", "?factions"], [, "Utilities"], [30, "Latest Comments", "?latest=comments"] /*, [31, "Latest Screenshots", "?latest=screenshots"] */ ];
 var mn_tools = [ /*[0, "Talent Calculator", "?talent", mn_talentCalc],*/ [1, "Maps", "?maps"]];
-var mn_path = [[0, "Database", , mn_database], [1, "Tools", , mn_tools]];
+var g_characters = null;
+var mn_characters = [];
+var mn_path = [[0, "Database", , mn_database], [1, "Tools", , mn_tools], [2, "Characters", , mn_characters]];
 var g_chr_classes = {
     11: "Druid",
     3: "Hunter",

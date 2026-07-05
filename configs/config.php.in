@@ -16,6 +16,13 @@ $UDWBaseconf['realmd']['pass']          = 'zpdb';
 $UDWBaseconf['realmd']['db']            = 'zp_realm';
 $UDWBaseconf['realmd']['table_prefix']  = ''; // optional table prefix
 
+// -- Characters Database --
+$UDWBaseconf['characters']['host']          = '127.0.0.1';
+$UDWBaseconf['characters']['user']          = 'zp';
+$UDWBaseconf['characters']['pass']          = 'zpdb';
+$UDWBaseconf['characters']['db']            = 'zp_characters';
+$UDWBaseconf['characters']['table_prefix']  = '';
+
 // -- AoWoW Database --
 $UDWBaseconf['aowow']['host']           = '127.0.0.1';
 $UDWBaseconf['aowow']['user']           = 'zp';

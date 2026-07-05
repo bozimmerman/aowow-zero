@@ -129,6 +129,26 @@ if (!$item = load_cache(5, $id)) {
             }
         }
 
+        // Add location data for object tabs
+        foreach (array('containedinobject', 'minedfromobject', 'gatheredfromobject') as $objtype) {
+            if (!empty($item[$objtype])) {
+                $gob_entries = array();
+                foreach ($item[$objtype] as $k => $v)
+                    $gob_entries[$k] = $v['entry'];
+                $gob_spawns = $DB->select('
+                    SELECT id, map, position_x AS x, position_y AS y
+                    FROM ?_gameobject
+                    WHERE id IN (?a)
+                    GROUP BY ROUND(position_x,-1), ROUND(position_y,-1), map
+                ', array_values($gob_entries));
+                $gob_zones = resolve_spawn_zones($DB, $gob_spawns);
+                foreach ($gob_entries as $k => $entry) {
+                    if (!empty($gob_zones[$entry]))
+                        $item[$objtype][$k]['location'] = implode(',', array_unique($gob_zones[$entry]));
+                }
+            }
+        }
+
         if (!($item['containedinobject']))
             unset($item['containedinobject']);
         if (!($item['minedfromobject']))
@@ -272,7 +292,7 @@ if (!$item = load_cache(5, $id)) {
 				FROM ?_aowow_factiontemplate, ?_creature_template c
 				{ LEFT JOIN (?_locales_creature l) ON l.entry=c.entry AND ? }
 				WHERE
-					pickpocketloot=?d
+					PickpocketLootId=?d
 					AND factiontemplateID=FactionAlliance
 				', $npc_cols[0], ($_SESSION['locale'] > 0) ? $_SESSION['locale'] : DBSIMPLE_SKIP, ($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, $lootid
             );
@@ -299,7 +319,7 @@ if (!$item = load_cache(5, $id)) {
 				FROM ?_aowow_factiontemplate, ?_creature_template c
 				{ LEFT JOIN (?_locales_creature l) ON l.entry=c.entry AND ? }
 				WHERE
-					skinloot=?d
+					SkinningLootId=?d
 					AND factiontemplateID=FactionAlliance
 				', $npc_cols[0], ($_SESSION['locale'] > 0) ? $_SESSION['locale'] : DBSIMPLE_SKIP, ($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, $lootid
             );
@@ -477,6 +497,26 @@ if (!$item = load_cache(5, $id)) {
     }
     unset($drops_fi);
 
+    // Add location data for creature tabs
+    foreach (array('droppedby', 'soldby', 'pickpocketingloot', 'skinnedfrom') as $mobtype) {
+        if (!empty($item[$mobtype])) {
+            $mob_entries = array();
+            foreach ($item[$mobtype] as $k => $v)
+                $mob_entries[$k] = $v['entry'];
+            $mob_spawns = $DB->select('
+                SELECT id, map, position_x AS x, position_y AS y
+                FROM ?_creature
+                WHERE id IN (?a)
+                GROUP BY ROUND(position_x,-1), ROUND(position_y,-1), map
+            ', array_values($mob_entries));
+            $mob_zones = resolve_spawn_zones($DB, $mob_spawns);
+            foreach ($mob_entries as $k => $entry) {
+                if (!empty($mob_zones[$entry]))
+                    $item[$mobtype][$k]['location'] = implode(',', array_unique($mob_zones[$entry]));
+            }
+        }
+    }
+
     save_cache(5, $item['entry'], $item);
 }
 global $page;
@@ -496,9 +536,7 @@ $smarty->assign('comments', getcomments($page['type'], $page['typeid']));
 
 // Количество MySQL запросов
 $smarty->assign('mysql', $DB->getStatistics());
-if (IsSet($allitems))
-    $smarty->assign('allitems', $allitems);
-if (IsSet($allspells))
-    $smarty->assign('allspells', $allspells);
+$smarty->assign('allitems', $allitems ?: array());
+$smarty->assign('allspells', $allspells ?: array());
 $smarty->assign('item', $item);
 $smarty->display('item.tpl');

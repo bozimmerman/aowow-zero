@@ -52,14 +52,20 @@ if (!$npc = load_cache(1, intval($id))) {
 
     if ($row) {
         $npc = $row;
-        $npc['name'] = $row['name_loc'] ? $row['name_loc'] : $row['name'];
-        $npc['subname'] = $row['subname_loc'] ? $row['subname_loc'] : $row['subname'];
+        $npc['name'] = !empty($row['name_loc']) ? $row['name_loc'] : $row['name'];
+        $npc['subname'] = !empty($row['subname_loc']) ? $row['subname_loc'] : $row['subname'];
         if ($npc['rank'] == 3) {
             $npc['minlevel'] = '??';
             $npc['maxlevel'] = '??';
         }
-        $npc['mindmg'] = ($row['mindmg'] /* + $row['attackpower'] */) * $row['dmg_multiplier'];
-        $npc['maxdmg'] = ($row['maxdmg'] /* + $row['attackpower'] */) * $row['dmg_multiplier'];
+        $npc['minhealth'] = $row['MinLevelHealth'];
+        $npc['maxhealth'] = $row['MaxLevelHealth'];
+        $npc['minmana'] = $row['MinLevelMana'];
+        $npc['maxmana'] = $row['MaxLevelMana'];
+        $npc['mingold'] = $row['MinLootGold'];
+        $npc['maxgold'] = $row['MaxLootGold'];
+        $npc['mindmg'] = $row['MinMeleeDmg'] * $row['DamageMultiplier'];
+        $npc['maxdmg'] = $row['MaxMeleeDmg'] * $row['DamageMultiplier'];
 
         $toDiv = array('minhealth', 'maxmana', 'minmana', 'maxhealth', 'armor', 'mindmg', 'maxdmg');
         // Разделяем на тысячи (ххххххххх => ххх,ххх,ххх)
@@ -83,7 +89,7 @@ if (!$npc = load_cache(1, intval($id))) {
         $npc['faction_num'] = $row['factionID'];
         $npc['faction'] = $row['faction-name'];
         // Деньги
-        $money = ($row['mingold'] + $row['maxgold']) / 2;
+        $money = ($npc['mingold'] + $npc['maxgold']) / 2;
         $npc['moneygold'] = floor($money / 10000);
         $npc['moneysilver'] = floor(($money - ($npc['moneygold'] * 10000)) / 100);
         $npc['moneycopper'] = floor($money - ($npc['moneygold'] * 10000) - ($npc['moneysilver'] * 100));
@@ -92,10 +98,14 @@ if (!$npc = load_cache(1, intval($id))) {
         // Используемые спеллы
         $npc['ablities'] = array();
         $tmp = array();
-        for ($j = 0; $j <= 4; ++$j) {
-            if ($row['spell' . $j] && !in_array($row['spell' . $j], $tmp)) {
-                $tmp[] = $row['spell' . $j];
-                if ($data = spellinfo($row['spell' . $j], 0)) {
+        $spells = $DB->selectRow('SELECT spell1, spell2, spell3, spell4 FROM ?_creature_template_spells WHERE entry=?d LIMIT 1', $id);
+        if ($spells)
+            $row = array_merge($row, $spells);
+        for ($j = 1; $j <= 4; ++$j) {
+            $spellKey = 'spell' . $j;
+            if (!empty($row[$spellKey]) && !in_array($row[$spellKey], $tmp)) {
+                $tmp[] = $row[$spellKey];
+                if ($data = spellinfo($row[$spellKey], 0)) {
                     if ($data['name'])
                         $npc['abilities'][] = $data;
                 }
@@ -298,19 +308,20 @@ $page = array(
     'tab' => 0,
     'type' => 1,
     'typeid' => $npc['entry'],
-    'path' => '[0,4,' . $npc['type'] . ']'
+    'path' => '[0,4,' . ($npc['creaturetype'] ?? 0) . ']'
 );
 
 $smarty->assign('page', $page);
+
+if (!$smarty->get_template_vars('zonedata'))
+    $smarty->assign('zonedata', array());
 
 // Комментарии
 $smarty->assign('comments', getcomments($page['type'], $page['typeid']));
 
 // Если хоть одна информация о вещи найдена - передаём массив с информацией о вещях шаблонизатору
-if (IsSet($allitems))
-    $smarty->assign('allitems', $allitems);
-if (IsSet($allspells))
-    $smarty->assign('allspells', $allspells);
+$smarty->assign('allitems', $allitems ?: array());
+$smarty->assign('allspells', $allspells ?: array());
 
 $smarty->assign('npc', $npc);
 

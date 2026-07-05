@@ -35,7 +35,7 @@ new Listview(
 	{section name=i loop=$data}
 		{ldelim}
 		{* Название/качество вещи, обязательно *}
-		name: '{$data[i].quality2}{$data[i].name|escape:"quotes"}',
+		name: '{$data[i].quality2}{$data[i].name|escape:"javascript"}',
 		{* Уровень вещи *}
 		{if $data[i].level}
 			level: {$data[i].level},

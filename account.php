@@ -39,8 +39,7 @@ if (($_REQUEST['account'] == 'signup') and (isset($_POST['username'])) and (isse
 }
 
 if (($_REQUEST['account'] == 'signin') and (isset($_POST['username'])) and (isset($_POST['password']))) {
-    //$usersend_pass = create_usersend_pass($_POST['username'], $_POST['password']);
-    $shapass = $_POST['password'];
+    $shapass = create_usersend_pass($_POST['username'], $_POST['password']);
     $user = CheckPwd($_POST['username'], $shapass);
     if ($user == -1) {
         del_user_cookie();
@@ -76,15 +75,20 @@ switch ($_REQUEST['account']):
     case 'signin_false':
     case 'signin':
         // Вход в систему
+        $smarty->assign('signin_error', $smarty->get_template_vars('signin_error') ?? '');
         $smarty->assign('register', $UDWBaseconf['register']);
         $smarty->display('signin.tpl');
         break;
     case 'signup_false':
     case 'signup':
-        // You can change to your realm page
-        //header( 'Location: http://your_realm_regpage' );
+        if (!$UDWBaseconf['register']) {
+            $smarty->assign('signup_error', $smarty->get_config_vars('Registration_disabled'));
+            $smarty->assign('register', false);
+        } else {
+            $smarty->assign('register', true);
+            $smarty->assign('signup_error', $smarty->get_template_vars('signup_error') ?? '');
+        }
         $smarty->display('signup.tpl');
-        break;
         break;
     case 'signout':
         // Выход из пользователя
@@ -104,5 +108,6 @@ switch ($_REQUEST['account']):
         if (($_REQUEST['next'] == '?account=signin') or ($_REQUEST['next'] == '?account=signup'))
             $_REQUEST['next'] = '';
         header('Location: ?' . $_REQUEST['next']);
+        exit;
         break;
 endswitch;

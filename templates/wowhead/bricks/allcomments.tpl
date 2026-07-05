@@ -3,7 +3,7 @@ var lv_comments = [
 {foreach name=foo from=$comments key=number item=comment}
 	{ldelim}
 		number:{$comment.number},
-		user:'{$comment.user}',
+		user:'{$comment.user|escape:"javascript"}',
 		body:'{$comment.body|escape:"javascript"}',
 		date:'{$comment.date|date_format:"%Y/%m/%d %H:%M:%S"}',
 		{if $comment.roles!=0}

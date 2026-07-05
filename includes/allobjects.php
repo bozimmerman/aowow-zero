@@ -85,11 +85,11 @@ function objectinfo($id, $level=0) {
 function objectinfo2(&$Row, $level=0) {
     global $DB;
     // Номер объекта
-    $object['entry'] = $Row['entry'];
+    $object['entry'] = $Row['entry'] ?? 0;
     // Название объекта
-    $object['name'] = !empty($Row['name_loc']) ? $Row['name_loc'] : $Row['name'];
+    $object['name'] = !empty($Row['name_loc']) ? $Row['name_loc'] : ($Row['name'] ?? '');
     // Тип объекта
-    $object['type'] = $Row['type'];
+    $object['type'] = $Row['type'] ?? 0;
     if ($level > 0) {
         // В зависимости от типа объекта, заполняем поля:
         switch ($object['type']):
@@ -102,7 +102,7 @@ function objectinfo2(&$Row, $level=0) {
                  * data4: openTextID (Unknown Text ID)
                  * data5: closeTextID (Unknown Text ID)
                  */
-                $object['lockid'] = $Row['data1'];
+                $object['lockid'] = ($Row['data1'] ?? 0);
                 break;
             case GAMEOBJECT_TYPE_BUTTON:
                 /*
@@ -116,7 +116,7 @@ function objectinfo2(&$Row, $level=0) {
                  * data7: closeTextID (Unknown Text ID)
                  * data8: losOK (Boolean flag)
                  */
-                $object['lockid'] = $Row['data1'];
+                $object['lockid'] = ($Row['data1'] ?? 0);
             case GAMEOBJECT_TYPE_QUESTGIVER:
                 /*
                  * data0: open (LockId from Lock.dbc)
@@ -152,7 +152,7 @@ function objectinfo2(&$Row, $level=0) {
                  * data15: use group loot rules (Boolean flag)
                  */
                 $object['lockid'] = $Row['data0'];
-                $object['lootid'] = $Row['data1'];
+                $object['lootid'] = ($Row['data1'] ?? 0);
                 break;
             case GAMEOBJECT_TYPE_BINDER:
                 /* 	Object type not used */
@@ -312,7 +312,7 @@ function objectinfo2(&$Row, $level=0) {
                  * data2: minRestock
                  * data3: maxRestock
                  */
-                $object['lootid'] = $Row['data1'];
+                $object['lootid'] = ($Row['data1'] ?? 0);
                 break;
             case GAMEOBJECT_TYPE_FLAGDROP:
                 /*
@@ -365,7 +365,7 @@ function objectinfo2(&$Row, $level=0) {
                 break;
         endswitch;
         // Тип объекта и требуемый уровень скилла, и какого скилла
-        if ($object['lockid']) {
+        if (!empty($object['lockid'])) {
             $lock_row = $DB->selectRow('
 				SELECT *
 				FROM ?_aowow_lock
@@ -408,7 +408,7 @@ function objectinfo2(&$Row, $level=0) {
             }
         }
         // Текст страниц
-        if ($object['pageid']) {
+        if (!empty($object['pageid'])) {
             while ($object['pageid'] > 0) {
                 $row = $DB->selectRow('
 						SELECT text, next_page

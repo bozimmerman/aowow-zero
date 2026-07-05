@@ -26,6 +26,7 @@ if (!$spells = load_cache(15, $cache_str)) {
     unset($spells);
 
     $spells = array();
+    $title = '';
     if ($s1 == 7) {
         $title = $smarty->get_config_vars('Class_spells');
         // Классовые

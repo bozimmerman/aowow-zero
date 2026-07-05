@@ -23,6 +23,17 @@
 		var g_serverTime = new Date('{$smarty.now|date_format:"%Y/%m/%d %H:%M:%S"}');
 		g_locale = {ldelim} id: {$locale}, name: '{$language}' {rdelim};
 {if $user}
-		g_user = {ldelim} id: {$user.id}, name: '{$user.name|escape:quotes}', roles: {$user.roles}, permissions: {$user.perms} {rdelim};
+        g_user = {ldelim} id: {$user.id}, name: '{$user.name|escape:quotes}', roles: {$user.roles}, permissions: {$user.perms} {rdelim};
+        g_characters = {$characters_json|default:'null'};
+        if (g_characters && g_characters.length > 0) {ldelim}
+                mn_characters.length = 0;
+                for (var i = 0; i < g_characters.length; i++) {ldelim}
+                        var ch = g_characters[i];
+                        mn_characters.push([i + 1, ch.name + ' (' + ch.level + ')', '?character=' + ch.guid]);
+                {rdelim}
+                mn_characters.push([0, 'All Characters', '?characters']);
+        {rdelim}
+{else}
+        mn_path.length = 2;
 {/if}
 	</script>

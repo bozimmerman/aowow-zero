@@ -42,6 +42,7 @@ function getcomments($type, $typeid) {
         $comments[$i]['body'] = $row['commentbody'];
         $comments[$i]['date'] = $row['post_date'];
         $comments[$i]['replyto'] = $row['replyto'];
+        $comments[$i]['indent'] = 0;
         if ($comments[$i]['replyto'] != $comments[$i]['id'])
             $comments[$i]['indent'] = 1;
 

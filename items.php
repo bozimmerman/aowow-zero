@@ -68,7 +68,7 @@ $smarty->assign('mysql', $DB->getStatistics());
 // Если хоть одна информация о вещи найдена - передаём массив с информацией о вещях шаблонизатору
 if (count($allitems) >= 0)
     $smarty->assign('allitems', $allitems);
-if (count($items >= 0))
+if (count($items) >= 0)
     $smarty->assign('items', $items);
 // Загружаем страницу
 $smarty->display('items.tpl');

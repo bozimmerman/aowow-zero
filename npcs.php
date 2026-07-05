@@ -65,7 +65,7 @@ $page = array(
 );
 $smarty->assign('page', $page);
 
-if (count($npcs >= 0))
+if (count($npcs) >= 0)
     $smarty->assign('npcs', $npcs);
 // Количество MySQL запросов
 $smarty->assign('mysql', $DB->getStatistics());

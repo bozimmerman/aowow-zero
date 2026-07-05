@@ -11,7 +11,7 @@
  */
 
 error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
 ini_set('serialize_precision', 4);
 
 require_once 'includes/FirePHPCore/fb.php';
@@ -54,12 +54,11 @@ function point_delim(&$str, &$a, &$b) {
  * @return int $result (-1) if user does not exist, (0) if passwords do not match, (>0) user id if passwords match
  */
 function CheckPwd($username, $shapass) {
-    require_once 'includes/DbSimple/Generic.php';
     global $rDB;
     global $UDWBaseconf;
     $user_row = $rDB->selectRow('SELECT id, sha_pass_hash, gmlevel FROM ?_account WHERE username=? LIMIT 1', $username);
     if ($user_row) {
-        if ($shapass == $user_row['sha_pass_hash']) {
+        if (hash_equals(strtoupper($user_row['sha_pass_hash']), strtoupper($shapass))) {
             $user = array();
             $user['id'] = $user_row['id'];
             $user['name'] = $username;

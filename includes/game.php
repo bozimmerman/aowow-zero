@@ -9,8 +9,8 @@
  *
  */
 
-require_once ('includes/allitems.php');
 require_once ('includes/alllocales.php');
+require_once ('includes/allitems.php');
 
 // Available character classes
 define("CLASS_WARRIOR", 1);
@@ -525,28 +525,28 @@ function position($id, $type) {
 
         // Во временную переменную tmp заносим номер локации
         $j = 0;
-        $tmp = $data[$j]['zone'];
+        $tmp = $data[$j]['zone'] ?? 0;
         // Номер массива
         $n = 0;
         $k = 0;
         $real_count = 0;
         $zonedata[$n] = array();
-        $zonedata[$n]['zone'] = $data[$j]['zone'];
-        $zonedata[$n]['name'] = $data[$j]['name'];
+        $zonedata[$n]['zone'] = $data[$j]['zone'] ?? 0;
+        $zonedata[$n]['name'] = $data[$j]['name'] ?? '';
 
         for ($j = 0; $j < count($data); $j++) {
             // Если изменился номер карты, то начинаем новый массив
-            if ($tmp != $data[$j]['zone']) {
+            if ($tmp != ($data[$j]['zone'] ?? 0)) {
                 // Количество объектов на зоне
                 $zonedata[$n]['count'] = $k;
                 $n++;
                 $exdata[$n] = array();
                 $zonedata[$n] = array();
-                $tmp = $data[$j]['zone'];
+                $tmp = $data[$j]['zone'] ?? 0;
                 // Заносим номер зоны в список зон
-                $zonedata[$n]['zone'] = $data[$j]['zone'];
+                $zonedata[$n]['zone'] = $data[$j]['zone'] ?? 0;
                 // TODO: Заносим название зоны в список зон
-                $zonedata[$n]['name'] = $data[$j]['name'];
+                $zonedata[$n]['name'] = $data[$j]['name'] ?? '';
                 $k = 0;
                 $real_count = 0;
             }
@@ -580,4 +580,40 @@ function position($id, $type) {
         $smarty->assign('zonedata', $zonedata);
         $smarty->assign('exdata', $exdata);
     }
+}
+
+function resolve_spawn_zones($DB, $spawns) {
+    if (!$spawns)
+        return array();
+    $by_map = array();
+    foreach ($spawns as $spawn)
+        $by_map[(int)$spawn['map']][] = $spawn;
+    $zones = array();
+    foreach ($by_map as $map => $map_spawns) {
+        $all_zones = $DB->select('
+            SELECT areatableID, x_min, x_max, y_min, y_max
+            FROM ?_aowow_zones
+            WHERE mapID=?d
+        ', $map);
+        if (!$all_zones)
+            continue;
+        foreach ($map_spawns as $spawn) {
+            $zones[$spawn['id']] ??= array();
+            $best = null;
+            $best_area = PHP_INT_MAX;
+            foreach ($all_zones as $z) {
+                if ($z['x_min'] < $spawn['x'] && $z['x_max'] > $spawn['x']
+                    && $z['y_min'] < $spawn['y'] && $z['y_max'] > $spawn['y']) {
+                    $area = ($z['x_max'] - $z['x_min']) * ($z['y_max'] - $z['y_min']);
+                    if ($area < $best_area) {
+                        $best_area = $area;
+                        $best = $z['areatableID'];
+                    }
+                }
+            }
+            if ($best !== null)
+                $zones[$spawn['id']][] = $best;
+        }
+    }
+    return $zones;
 }

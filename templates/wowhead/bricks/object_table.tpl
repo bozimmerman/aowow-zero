@@ -21,7 +21,7 @@ new Listview({ldelim}
 		{section name=i loop=$data}
 			{ldelim}
 				{* Название обекта, обязательно *}
-				name: '{$data[i].name|escape:"quotes"}',
+				name: '{$data[i].name|escape:"javascript"}',
 				{* Тип обекта, обязательно *}
 				type: {$data[i].type},
 				{* Процент дропа *}
@@ -34,6 +34,9 @@ new Listview({ldelim}
 				{/if}
 				{* Номер объекта, обязателен *}
 					id: {$data[i].entry}
+				{if isset($data[i].location)}
+				,location: [{$data[i].location}]
+				{/if}
 				{rdelim}
 				{if $smarty.section.i.last}{else},{/if}
 		{/section}

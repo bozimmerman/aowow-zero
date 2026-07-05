@@ -28,10 +28,10 @@ class Smarty_UDWBase extends Smarty {
      * @global type $cwd
      * @global type $UDWBaseconf 
      */
-    function Smarty_UDWBase() {
+    function __construct() {
         global $cwd;
         global $UDWBaseconf;
-        $this->Smarty();
+        parent::__construct();
 
         // Configure the directories containing templates, cache, and configuration
         $this->template_dir = $cwd . '/templates/' . $UDWBaseconf['udwbase']['template'] . '/';

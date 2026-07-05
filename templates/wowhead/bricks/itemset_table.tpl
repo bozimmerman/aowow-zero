@@ -7,7 +7,7 @@
 		data: [
 			{section name=i loop=$data}
 				{ldelim}
-					name: '{$data[i].quality2}{$data[i].name|escape:"quotes"}',
+					name: '{$data[i].quality2}{$data[i].name|escape:"javascript"}',
 					{if $data[i].minlevel}minlevel: {$data[i].minlevel},{/if}
 					{if $data[i].maxlevel}maxlevel: {$data[i].maxlevel},{/if}
 					{if $data[i].pieces}pieces:[{section name=j loop=$data[i].pieces}{$data[i].pieces[j]}{if $smarty.section.j.last}{else},{/if}{/section}],{/if}

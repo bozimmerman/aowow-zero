@@ -24,6 +24,7 @@ $DB = $DBSimple->connect("mysql://" . $UDWBaseconf['world']['user'] . ":" . $UDW
 $DB->setErrorHandler('databaseErrorHandler');
 $DB->setIdentPrefix($UDWBaseconf['world']['table_prefix']);
 $DB->query('SET NAMES ?', 'utf8');
+$DB->query("SET SESSION sql_mode = ''");
 
 // Connect to the realm DB
 if ($UDWBaseconf['realmd']) {
@@ -31,6 +32,14 @@ if ($UDWBaseconf['realmd']) {
     $rDB->setErrorHandler('databaseErrorHandler');
     $rDB->setIdentPrefix($UDWBaseconf['realmd']['table_prefix']);
     $rDB->query('SET NAMES ?', 'utf8');
+}
+
+// Connect to the characters DB
+if (isset($UDWBaseconf['characters']) && $UDWBaseconf['characters']) {
+    $cDB = $DBSimple->connect("mysql://" . $UDWBaseconf['characters']['user'] . ":" . $UDWBaseconf['characters']['pass'] . "@" . $UDWBaseconf['characters']['host'] . "/" . $UDWBaseconf['characters']['db']);
+    $cDB->setErrorHandler('databaseErrorHandler');
+    $cDB->setIdentPrefix($UDWBaseconf['characters']['table_prefix']);
+    $cDB->query('SET NAMES ?', 'utf8');
 }
 
 /**
@@ -163,7 +172,7 @@ function save_cache($type, $type_id, $data, $prefix = '') {
  * @param type $type_id
  * @return type
  */
-function load_cache($type, $type_id) {
+function load_cache($type, $type_id, $prefix = '') {
     global $cache_types, $smarty, $allitems, $allspells, $exdata, $zonedata;
 
     $type_str = $cache_types[$type];
@@ -181,13 +190,13 @@ function load_cache($type, $type_id) {
         return false;
 
     if ($data[2])
-        $allitems = unserialize($data[2]);
+        $allitems = @unserialize($data[2]);
     if ($data[3])
-        $allspells = unserialize($data[3]);
+        $allspells = @unserialize($data[3]);
     if ($data[4])
-        $smarty->assign('exdata', unserialize($data[4]));
+        $smarty->assign('exdata', @unserialize($data[4]));
     if ($data[5])
-        $smarty->assign('zonedata', unserialize($data[5]));
+        $smarty->assign('zonedata', @unserialize($data[5]));
 
-    return unserialize($data[1]);
+    return @unserialize($data[1]);
 }

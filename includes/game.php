@@ -519,9 +519,15 @@ function position($id, $type) {
     if (count($data) > 0) {
         $data = mass_coord($data);
 
+        $data = array_filter($data, function ($entry) {
+            return !empty($entry['name']);
+        });
+
+        if (!$data)
+            return;
+
         // Сортируем массив. Зачем???
-        if ($data)
-            sort($data);
+        sort($data);
 
         // Во временную переменную tmp заносим номер локации
         $j = 0;
